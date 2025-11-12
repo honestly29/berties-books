@@ -1,18 +1,26 @@
 <!doctype html>
 <html>
   <head>
-    <title>List <%=shopData.shopName%></title>
-    <link rel="stylesheet"  type="text/css" href="/main.css" />
+    <title>Search Results <%= shopData.shopName %></title>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
   </head>
+
   <body>
+    <!-- Check if shopData exists. If not, display default name -->
     <h1><%= shopData && shopData.shopName ? shopData.shopName : 'Berties Book Shop' %></h1>
+
+    <!-- If search_text exists, show what the user searched for -->
     <% if (typeof search_text !== 'undefined') { %>
       <p>Results for "<%= search_text %>"</p>
     <% } %>
+
+    <!-- If no books were found (the array is empty or missing), show a message -->
     <% if (!availableBooks || availableBooks.length === 0) { %>
       <p>No books found.</p>
     <% } else { %>
+      <!-- Otherwise, list all the books -->
       <ul>
+        <!-- Loop through each book in the availableBooks array -->
         <% for (let i = 0; i < availableBooks.length; i++) { %>
           <li><strong><%= availableBooks[i].name %></strong> £<%= availableBooks[i].price %></li>
         <% } %>

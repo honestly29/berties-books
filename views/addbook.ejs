@@ -6,6 +6,8 @@
   </head>
   <body>
     <h1><%=shopData.shopName%>: Add book</h1>
+    <!-- Form to add a new book record to the database.
+         Submits a POST request to the /books/bookadded route -->
     <form method="POST" action="bookadded">
         <p>Book name: <input id="name" type="text" name="name" /></p>
         <p>Price: <input id="price" type="number" step="0.01" name="price" /></p>

@@ -3,19 +3,22 @@ const express = require("express")
 const router = express.Router()
 
 
-// Search for books
+// Render search page
 router.get('/search',function(req, res, next){
     res.render("search.ejs")
 });
 
 router.get('/search-result', (req, res, next) => {
-  const search_text = (req.query.search_text || '').trim();
-  if (!search_text) return res.render('searchresults.ejs', { availableBooks: [], search_text });
+    // get the search text from the form
+    const search_text = (req.query.search_text || '').trim();
+    // if user didn't type anything, display empty results page
+    if (!search_text) return res.render('searchresults.ejs', { availableBooks: [], search_text });
 
-  const sql = 'SELECT name, price FROM books WHERE name LIKE CONCAT("%", ?, "%")';
-  db.query(sql, [search_text], (err, result) => {
-    if (err) return next(err);
-    res.render('searchresults.ejs', { availableBooks: result, search_text });
+    // sql query to all books where the name contains the search word
+    const sqlSearchBooks = 'SELECT name, price FROM books WHERE name LIKE CONCAT("%", ?, "%")';
+    db.query(sqlSearchBooks, [search_text], (err, result) => {
+        if (err) return next(err);
+        res.render('searchresults.ejs', { availableBooks: result, search_text });
   });
 });
 
@@ -23,9 +26,9 @@ router.get('/search-result', (req, res, next) => {
 
 // List current books in the database
 router.get('/list', function(req, res, next) {
-    let sqlquery = "SELECT * FROM books"; // query database to get all the books
+    const sqlSelectAllBooks = "SELECT * FROM books"; // query database to get all the books
     // execute sql query
-    db.query(sqlquery, (err, result) => {
+    db.query(sqlSelectAllBooks, (err, result) => {
         if (err) {
             next(err)
         }
@@ -42,10 +45,10 @@ router.get('/addbook', function(req, res, next) {
 
 router.post('/bookadded', function (req, res, next) {
     // saving data in database
-    let sqlquery = "INSERT INTO books (name, price) VALUES (?,?)"
+    const sqlInsertBook = "INSERT INTO books (name, price) VALUES (?,?)"
     // execute sql query
-    let newrecord = [req.body.name, req.body.price]
-    db.query(sqlquery, newrecord, (err, result) => {
+    const newrecord = [req.body.name, req.body.price]
+    db.query(sqlInsertBook, newrecord, (err, result) => {
         if (err) {
             next(err)
         }
@@ -55,10 +58,10 @@ router.post('/bookadded', function (req, res, next) {
 }) 
 
 
-
+// Bargin books (< £20)
 router.get('/barginbooks', function(req, res) {
-    let sqlquery = "SELECT name, price FROM books WHERE price<20"; // query database to get books which are priced less than £20
-    db.query(sqlquery, (err, result) => {
+    const sqlSelectBargainBooks = "SELECT name, price FROM books WHERE price<20"; // query database to get books which are priced less than £20
+    db.query(sqlSelectBargainBooks, (err, result) => {
         if (err) {
             next(err)
         }
