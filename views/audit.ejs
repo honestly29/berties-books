@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <title>List <%=shopData.shopName%></title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <h1><%=shopData.shopName%></h1>
+    <!-- Audit log table-->
+    <h2>Audit Log</h2>
+    <table border="1">
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Success</th>
+        <th>Timestamp</th>
+      </tr>
+
+      <% for (let i = 0; i < audit.length; i++) { %>
+        <tr>
+          <td><%= audit[i].id %></td>
+          <td><%= audit[i].username %></td>
+          <td><%= audit[i].success %></td>
+          <td><%= audit[i].timestamp %></td>
+        </tr>
+      <% } %>
+    </table>
+  </body>
+</html>

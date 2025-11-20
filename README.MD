@@ -61,11 +61,35 @@ The application demonstrates full-stack integration — combining Node.js server
 
 To avoid storing sensitive information directly in the source code, the application uses the dotenv module. This allows all database credentials to be stored in a separate .env file rather than inside index.js.
 
+**How it was implemented:**
+
 - Installed using npm install dotenv.
 - .env file was created in the project root containing the database host, username, password, and database name.
 - require('dotenv').config(); was added at the top of index.js to load environment variables.
 - The MySQL connection pool was updated to use process.env.DB_HOST, process.env.DB_USER, etc.
 - .env was added to .gitignore so credentials are never uploaded to GitHub.
+
+## Audit Logging
+
+To track login activity and improve security, an audit logging system was implemented. This records both successful and failed login attempts.
+
+**How it was implemented:**
+
+1. I created a new database table called `audit_log` containing:
+
+   - `username` (the supplied email)
+   - `success` (true or false)
+   - `timestamp` (automatically recorded)
+
+2. In the `/users/loggedin` login route, an INSERT query is executed after each login attempt:
+
+   - On correct password → a record is saved with `success = true`.
+   - On incorrect password or unknown user → a record is saved with `success = false`.
+
+3. A new route `/users/audit` was added.  
+   This selects all audit records and displays them in a simple table for review.
+
+This feature makes it possible to view login behaviour, detect suspicious activity, and keep a basic audit trail of authentication events.
 
 ## Access the live site:
 

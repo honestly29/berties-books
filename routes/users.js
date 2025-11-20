@@ -50,8 +50,12 @@ router.post('/loggedin', function(req, res, next) {
             return next(err);
         }
 
-        // if username doesn't exist
+        // if no user found
         if (results.length === 0) {
+            // log failed login
+            db.query(
+                "INSERT INTO audit_log (username, success) VALUES (?, false)", [username]
+            );
             return res.send('Login Failed: username not found');
         }
 
@@ -60,18 +64,40 @@ router.post('/loggedin', function(req, res, next) {
         // Compare the password supplied with the password in the database
         bcrypt.compare(password, hashedPassword, function(err, result) {
             if (err) {
-                console.error(err);
                 return res.send('Error comparing passwords');
             }
             else if (result == true) {
+                // log success
+                db.query(
+                    "INSERT INTO audit_log (username, success) VALUES (?, true)",
+                    [username]
+                );
                 return res.send('Login successful!');
             }
             else {
+                // Log failure
+                db.query(
+                    "INSERT INTO audit_log (username, success) VALUES (?, false)",
+                    [username]
+                );
                 return res.send('Login failed: incorrect password');
             }
         });
     });
 });
+
+
+// Audit page for listing login attempts
+router.get('/audit', function(req, res, next) {
+    const sqlSelectAllAudits = "SELECT * FROM audit_log ORDER BY timestamp DESC";
+
+    db.query(sqlSelectAllAudits, (err, results) => {
+        if (err) return next(err);
+
+        res.render("audit.ejs", { audit: results });
+    });
+});
+
 
 // Page for listing current users in the database
 router.get('/list', function(req, res, next) {
