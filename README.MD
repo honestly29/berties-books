@@ -16,8 +16,9 @@ A simple Node.js and Express web application built in the **Dynamic Web Applicat
 - Allows users to **register** by submitting a username, name, email, and password.
 - Hashes passwords securely using **bcrypt** before storing them in the database.
 - Allows users to **log in**, comparing the supplied password with the stored hash.
+- Handles users trying to register with usernames/passwords that already exist.
 
-The application demonstrates full-stack integration — combining Node.js server logic, EJS views, SQL queries, form handling, bcrypt hashing, and secure environment variable management.
+The application demonstrates full-stack integration - combining Node.js server logic, EJS views, SQL queries, form handling, bcrypt hashing, and secure environment variable management.
 
 ---
 
