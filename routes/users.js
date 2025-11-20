@@ -34,7 +34,46 @@ router.post('/registered', function (req, res, next) {
 }); 
 
 
-// List current users in the database
+// Login page
+router.get('/login', function (req, res, next) {
+    res.render('login.ejs')
+})
+
+router.post('/loggedin', function(req, res, next) {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const sqlSelectHashedPassword = 'SELECT hashed_password FROM users WHERE username = ?';
+
+    db.query(sqlSelectHashedPassword, [username], (err, results) => {
+        if (err) {
+            return next(err);
+        }
+
+        // if username doesn't exist
+        if (results.length === 0) {
+            return res.send('Login Failed: username not found');
+        }
+
+        const hashedPassword = results[0].hashed_password;
+
+        // Compare the password supplied with the password in the database
+        bcrypt.compare(password, hashedPassword, function(err, result) {
+            if (err) {
+                console.error(err);
+                return res.send('Error comparing passwords');
+            }
+            else if (result == true) {
+                return res.send('Login successful!');
+            }
+            else {
+                return res.send('Login failed: incorrect password');
+            }
+        });
+    });
+});
+
+// Page for listing current users in the database
 router.get('/list', function(req, res, next) {
     const sqlSelectAllUsers = "SELECT * FROM users"; // query database to get all the users
     db.query(sqlSelectAllUsers, (err, result) => {
