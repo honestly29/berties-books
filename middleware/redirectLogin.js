@@ -1,6 +1,6 @@
 function redirectLogin(req, res, next) {
     if (!req.session.userId ) {
-      res.redirect((process.env.BASE_PATH || '') + '/users/login');
+      res.redirect((process.env.DB_BASE_PATH || '') + '/users/login');
     } else { 
         next (); // move to the next middleware function
     } 
