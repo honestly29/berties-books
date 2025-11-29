@@ -82,6 +82,40 @@ When not logged in, attempts to access /users/list or /users/audit redirect to t
 login page. After logging in, these pages become accessible. The logout route
 successfully destroys the session and prevents further access to protected pages.
 
+## Validation summary
+
+Server side validation is implemented using the express-validator module.
+
+Registration page (/users/register and /users/registered):
+
+- First name: must not be empty.
+- Last name: must not be empty.
+- Email: must be a valid email address (isEmail) and is normalised.
+- Username: length must be between 5 and 20 characters.
+- Password: length must be at least 8 characters.
+
+If any of these checks fail, the registration form is re-rendered with error messages and the previously entered data (except the password). This prevents invalid data being inserted into the database and improves user experience.
+
+Login page (/users/login and /users/loggedin):
+
+- Username: must not be empty.
+- Password: must not be empty.
+
+If either field is missing, the login form is re-rendered with clear error messages. This avoids unnecessary database lookups when the form is incomplete.
+
+Book pages (E.g. /books/add):
+
+- Title: must not be empty.
+- Price: must be a number greater than 0.
+
+This helps ensure that only sensible book data is stored in the database and prevents obvious input errors such as negative prices.
+
+Pages without validation:
+
+- Static GET pages such as the home page (/), about (/about), the user list (/users/list) and audit log (/users/audit) do not accept user input in forms, so no server side validation is required on these routes.
+
+Overall, validation is applied to all routes that process user submitted form data, and is not used on purely read only or static pages where there is nothing to validate.
+
 ## dotenv
 
 To avoid storing sensitive information directly in the source code, the application uses the dotenv module. This allows all database credentials to be stored in a separate .env file rather than inside index.js.

@@ -1,6 +1,7 @@
 // Create a new router
 const express = require("express")
 const router = express.Router()
+const { check, validationResult } = require('express-validator');
 
 
 // Render search page
@@ -40,22 +41,48 @@ router.get('/list', function(req, res, next) {
 
 // Add books to the database
 router.get('/addbook', function(req, res, next) {
-    res.render('addbook.ejs');
+    res.render('addbook.ejs', { 
+        errors: [], 
+        formData: {} 
+    });
 })
 
-router.post('/bookadded', function (req, res, next) {
-    // saving data in database
-    const sqlInsertBook = "INSERT INTO books (name, price) VALUES (?,?)"
-    // execute sql query
-    const newrecord = [req.body.name, req.body.price]
-    db.query(sqlInsertBook, newrecord, (err, result) => {
-        if (err) {
-            next(err)
+router.post(
+    '/bookadded',
+    [
+        check('name')
+            .notEmpty()
+            .withMessage('Book name is required'),
+
+        check('price')
+            .isFloat({ gt: 0 })
+            .withMessage('Price must be a number greater than 0')
+    ],
+    function (req, res, next) {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.render('addbook.ejs', {
+                errors: errors.array(),
+                formData: req.body
+            });
         }
-        else
-            res.send(' This book is added to database, name: '+ req.body.name + ' price '+ req.body.price)
-    })
-}) 
+
+        const sqlInsertBook = "INSERT INTO books (name, price) VALUES (?, ?)";
+        const newrecord = [req.body.name, req.body.price];
+
+        db.query(sqlInsertBook, newrecord, (err, result) => {
+            if (err) return next(err);
+
+            res.send(
+                'This book is added to the database, name: ' +
+                req.body.name +
+                ', price: ' +
+                req.body.price
+            );
+        });
+    }
+);
 
 
 // Bargin books (< £20)

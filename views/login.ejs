@@ -6,8 +6,18 @@
   </head>
   <body>
     <h1>Login to <%=shopData.shopName%></h1>
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="error-box">
+        <ul>
+          <% errors.forEach(err => { %>
+            <li><%= err.msg %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+
     <form method="POST" action="loggedin">
-        <p>Username: <input id="username" type="text" name="username" required/></p>
+        <p>User name: <input id="username" type="text" name="username" required value="<%= formData ? formData.username : '' %>" /></p>
         <p>Password: <input id="password" type="password" name="password" required/></p>
         <input type="submit" value="Log in" />
       </form>

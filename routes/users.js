@@ -78,58 +78,75 @@ router.post(
 
 // Login page
 router.get('/login', function (req, res, next) {
-    res.render('login.ejs')
+    res.render('login.ejs', { 
+        errors: [], 
+        formData: {} 
+    });
 })
 
-router.post('/loggedin', function(req, res, next) {
-    const username = req.body.username;
-    const password = req.body.password;
+router.post(
+    '/loggedin',
+    [
+        check('username')
+            .notEmpty()
+            .withMessage('Username is required'),
+        check('password')
+            .notEmpty()
+            .withMessage('Password is required')
+    ],
+    function(req, res, next) {
 
-    const sqlSelectHashedPassword = 'SELECT hashed_password FROM users WHERE username = ?';
-
-    db.query(sqlSelectHashedPassword, [username], (err, results) => {
-        if (err) {
-            return next(err);
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Re render login page with errors and previously entered username
+            return res.render('login', {
+                errors: errors.array(),
+                formData: req.body
+            });
         }
 
-        // if no user found
-        if (results.length === 0) {
-            // log failed login
-            db.query(
-                "INSERT INTO audit_log (username, success) VALUES (?, false)", [username]
-            );
-            return res.send('Login Failed: username not found');
-        }
+        const username = req.body.username;
+        const password = req.body.password;
 
-        const hashedPassword = results[0].hashed_password;
+        const sqlSelectHashedPassword = 'SELECT hashed_password FROM users WHERE username = ?';
 
-        // Compare the password supplied with the password in the database
-        bcrypt.compare(password, hashedPassword, function(err, result) {
+        db.query(sqlSelectHashedPassword, [username], (err, results) => {
             if (err) {
-                return res.send('Error comparing passwords');
+                return next(err);
             }
-            else if (result == true) {
-                // log success
-                db.query(
-                    "INSERT INTO audit_log (username, success) VALUES (?, true)",
-                    [username]
-                );
-                // Save user session here, when login is successful
-                req.session.userId = req.body.username;
 
-                return res.send('Login successful!');
-            }
-            else {
-                // Log failure
+            if (results.length === 0) {
                 db.query(
-                    "INSERT INTO audit_log (username, success) VALUES (?, false)",
+                    'INSERT INTO audit_log (username, success) VALUES (?, false)',
                     [username]
                 );
-                return res.send('Login failed: incorrect password');
+                return res.send('Login Failed: username not found');
             }
+
+            const hashedPassword = results[0].hashed_password;
+
+            bcrypt.compare(password, hashedPassword, function(err, result) {
+                if (err) {
+                    return res.send('Error comparing passwords');
+                } else if (result === true) {
+                    db.query(
+                        'INSERT INTO audit_log (username, success) VALUES (?, true)',
+                        [username]
+                    );
+                    req.session.userId = req.body.username;
+                    return res.send('Login successful!');
+                } else {
+                    db.query(
+                        'INSERT INTO audit_log (username, success) VALUES (?, false)',
+                        [username]
+                    );
+                    return res.send('Login failed: incorrect password');
+                }
+            });
         });
-    });
-});
+    }
+);
+
 
 
 // Audit page for listing login attempts
