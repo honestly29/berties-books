@@ -14,21 +14,41 @@ router.get('/about',function(req, res, next){
 });
 
 router.get('/weather', function(req, res, next){
+
+    // If no city provided yet, just show the form
+    if (!req.query.city) {
+        return res.render('weather.ejs', { wmsg: null, city: null });
+    }
+
+    // Sanitize the input
+    const city = req.sanitize(req.query.city);
+
     let apiKey = process.env.WEATHER_API_KEY;
-    let city = 'london'
     let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
                     
     request(url, function (err, response, body) {
         if(err){
-            next(err)
-        } else {
-            //res.send(body)
-            var weather = JSON.parse(body)
-            var wmsg = 'It is '+ weather.main.temp + 
-            ' degrees in '+ weather.name +
-            '! <br> The humidity now is: ' + 
-            weather.main.humidity;
-            res.send (wmsg);
+            return next(err)
+        } 
+        
+        try {
+            let weather = JSON.parse(body);
+
+            if (weather.cod != 200) {
+                // City not found or api error
+                return res.render('weather.ejs', {
+                    wmsg: `Could not find weather for city: ${city}.`,
+                    city: city  
+                });
+            }
+
+            let wmsg = `It is ${weather.main.temp}°C in ${weather.name}.` +
+                `<br>Humidity: ${weather.main.humidity}%`;
+
+            res.render('weather.ejs', { wmsg: wmsg, city: city });
+
+        } catch (e) {
+            next(e);
         } 
     });
 });

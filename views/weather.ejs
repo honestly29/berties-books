@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+  </head>
+  <body>
+
+    <h1>Weather Forecast</h1>
+
+    <!-- Form to enter city -->
+    <form method="GET" action="/weather">
+      <p>Enter a city: 
+         <input type="text" name="city" required value="<%= city ? city : '' %>">
+      </p>
+      <input type="submit" value="Get Weather">
+    </form>
+
+    <!-- Display weather message if available -->
+    <% if (wmsg) { %>
+      <p><%= wmsg %></p>
+    <% } %>
+
+    <p><a href="/">Home</a></p>
+
+  </body>
+</html>
