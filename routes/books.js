@@ -2,6 +2,7 @@
 const express = require("express")
 const router = express.Router()
 const { check, validationResult } = require('express-validator');
+const redirectLogin = require('../middleware/redirectLogin');
 
 
 // Render search page
@@ -41,7 +42,7 @@ router.get('/list', function(req, res, next) {
 
 
 // Add books to the database
-router.get('/addbook', function(req, res, next) {
+router.get('/addbook', redirectLogin,function(req, res, next) {
     res.render('addbook.ejs', { 
         errors: [], 
         formData: {} 
