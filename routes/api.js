@@ -5,39 +5,40 @@ const router = express.Router();
 // GET /api/books - return list of books as JSON
 router.get('/books', function (req, res, next) {
 
-    let search = req.query.search;
+    // Get query parameters
+    let search = req.query.search ? req.sanitize(req.query.search) : null;
+    let min = req.query.minprice ? parseFloat(req.query.minprice) : null;
+    let max = req.query.maxprice ? parseFloat(req.query.maxprice) : null;
 
-    // If a search term is provided
+    // Select all books initially
+    let sqlquery = "SELECT * FROM books WHERE 1=1";
+    let params = [];
+
+    // Search filter
     if (search) {
-        search = req.sanitize(search); 
-
-        let sqlquery = `
-            SELECT * FROM books 
-            WHERE name LIKE CONCAT('%', ?, '%')
-        `;
-
-        db.query(sqlquery, [search], (err, result) => {
-            if (err) {
-                res.json(err);
-                return next(err);
-            } else {
-                res.json(result);
-            }
-        });
-
-    } else {
-        // If no search term then return all books
-        let sqlquery = "SELECT * FROM books";
-
-        db.query(sqlquery, (err, result) => {
-            if (err) {
-                res.json(err);
-                return next(err);
-            } else {
-                res.json(result);
-            }
-        });
+        sqlquery += " AND name LIKE CONCAT('%', ?, '%')";
+        params.push(search);
     }
+
+    // Min price filter
+    if (min !== null && !isNaN(min)) {
+        sqlquery += " AND price >= ?";
+        params.push(min);
+    }
+
+    // Max price filter
+    if (max !== null && !isNaN(max)) {
+        sqlquery += " AND price <= ?";
+        params.push(max);
+    }
+
+    db.query(sqlquery, params, (err, result) => {
+        if (err) {
+            res.json(err);
+            return next(err);
+        }
+        res.json(result);
+    });
 
 });
 
