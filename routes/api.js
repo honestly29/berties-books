@@ -7,8 +7,10 @@ router.get('/books', function (req, res, next) {
 
     // Get filters
     let search = req.query.search ? req.sanitize(req.query.search) : null;
-    let min = req.query.minprice ? parseFloat(req.query.minprice) : null;
-    let max = req.query.maxprice ? parseFloat(req.query.maxprice) : null;
+    let min = req.query.minprice ? parseFloat(req.query.minprice) : req.query.min_price ? parseFloat(req.query.min_price) : 
+    null;
+    let max = req.query.maxprice ? parseFloat(req.query.maxprice) : req.query.max_price ? parseFloat(req.query.max_price) : 
+    null;
     let sort = req.query.sort ? req.sanitize(req.query.sort) : null;
 
     // Select all books initally
