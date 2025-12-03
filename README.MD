@@ -208,6 +208,8 @@ Public Routes:
 - /about
 - /users/register and /users/registered
 - /users/login and /users/loggedin
+- /books/list and /books/search and books/barginbooks
+- /weather
 
 Testing:
 When not logged in, attempts to access /users/list or /users/audit redirect to the
