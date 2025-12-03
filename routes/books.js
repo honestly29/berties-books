@@ -82,7 +82,7 @@ router.post(
                 'This book is added to the database, name: ' +
                 name +
                 ', price: ' +
-                price
+                price + '. <a href="/">Home</a>'
             );
         });
     }

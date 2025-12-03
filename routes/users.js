@@ -137,7 +137,7 @@ router.post(
                         [username]
                     );
                     req.session.userId = req.body.username;
-                    return res.send('Login successful!');
+                    return res.send("Login successful! <a href='/'>Home</a>");
                 } else {
                     db.query(
                         'INSERT INTO audit_log (username, success) VALUES (?, false)',
