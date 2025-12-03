@@ -40,8 +40,7 @@ router.get('/list', function(req, res, next) {
 });
 
 
-
-// Add books to the database
+// Add a new book - render empty form
 router.get('/addbook', redirectLogin,function(req, res, next) {
     res.render('addbook.ejs', { 
         errors: [], 
@@ -49,8 +48,10 @@ router.get('/addbook', redirectLogin,function(req, res, next) {
     });
 })
 
+// Process add book form submission
 router.post(
     '/bookadded',
+    // Server-side validation
     [
         check('name')
             .notEmpty()
@@ -60,24 +61,30 @@ router.post(
             .isFloat({ gt: 0 })
             .withMessage('Price must be a number greater than 0')
     ],
-    function (req, res, next) {
 
+    function (req, res, next) {
+        // Check validation results
         const errors = validationResult(req);
+
+        // If validation fails, re-render the form with errors and previously entered data
         if (!errors.isEmpty()) {
             return res.render('addbook.ejs', {
                 errors: errors.array(),
                 formData: req.body
             });
         }
-
-        const sqlInsertBook = "INSERT INTO books (name, price) VALUES (?, ?)";
+        // Sanitize input field
         const name = req.sanitize(req.body.name);
         const price = req.body.price; 
+
+        const sqlInsertBook = "INSERT INTO books (name, price) VALUES (?, ?)";
         const newrecord = [name, price];
 
         db.query(sqlInsertBook, newrecord, (err, result) => {
+            // Handle database errors
             if (err) return next(err);
 
+            // Successfully added the book
             res.send(
                 'This book is added to the database, name: ' +
                 name +
